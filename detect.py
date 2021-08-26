@@ -4,7 +4,7 @@ from sys import platform
 from models import *  # set ONNX_EXPORT in models.py
 from utils.datasets import *
 from utils.utils import *
-
+import os
 
 def detect(save_img=False):
     img_size = (320, 192) if ONNX_EXPORT else opt.img_size  # (320, 192) or (416, 256) or (608, 352) for (height, width)
@@ -102,6 +102,10 @@ def detect(save_img=False):
                 p, s, im0 = path, '', im0s
 
             save_path = str(Path(out) / Path(p).name)
+            print("save path: ",save_path)
+            splitted_name = os.path.splitext(save_path)
+            print("Splitted name:",splitted_name[0])
+            save_path1 = splitted_name[0]
             s += '%gx%g ' % img.shape[2:]  # print string
             if det is not None and len(det):
                 # Rescale boxes from img_size to im0 size
@@ -114,13 +118,15 @@ def detect(save_img=False):
 
                 # Write results
                 for *xyxy, conf, cls in det:
-                    print(save_txt)
                     if save_txt:  # Write to file
-                        with open(save_path + '.txt', 'a') as file:
+                        
+                       # save_path = os.path.splitext(save_path)
+                       # print(save_path[0])
+                        with open(save_path1 + '.txt', 'a') as file:
+                            #file.write(('%g ' * 6 + '\n') % (*xyxy, cls, conf))
                             label = '%s ' % (names[int(cls)])
                             file.write(label)
                             file.write(('%g ' * 5 + '\n') % (conf*100, *xyxy))
-
                     if save_img or view_img:  # Add bbox to image
                         label = '%s %.2f' % (names[int(cls)], conf)
                         plot_one_box(xyxy, im0, label=label, color=colors[int(cls)])
@@ -166,7 +172,7 @@ if __name__ == '__main__':
     parser.add_argument('--source', type=str, default='data/samples', help='source')  # input file/folder, 0 for webcam
     parser.add_argument('--output', type=str, default='output', help='output folder')  # output folder
     parser.add_argument('--img-size', type=int, default=416, help='inference size (pixels)')
-    parser.add_argument('--conf-thres', type=float, default=0.5, help='object confidence threshold')
+    parser.add_argument('--conf-thres', type=float, default=0.3, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.6, help='IOU threshold for NMS')
     parser.add_argument('--fourcc', type=str, default='mp4v', help='output video codec (verify ffmpeg support)')
     parser.add_argument('--half', action='store_true', help='half precision FP16 inference')
